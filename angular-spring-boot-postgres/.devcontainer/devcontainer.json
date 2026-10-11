@@ -1,0 +1,9 @@
+{
+  "name": "Angular / Spring Boot / PostgreSQL",
+  "dockerComposeFile": ["../compose.dev.yml"],
+  "service": "dev",
+  "workspaceFolder": "/workspace/app",
+  "remoteUser": "dev",
+  "overrideCommand": false,
+  "shutdownAction": "stopCompose"
+}

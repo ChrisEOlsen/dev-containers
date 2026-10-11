@@ -1,0 +1,20 @@
+{
+  "vim.useCtrlKeys": false,
+  "vim.handleKeys": {
+    "<C-w>": false
+  },
+  "editor.tabSize": 2,
+  "java.jdt.ls.java.home": "/opt/java/openjdk",
+  "java.configuration.runtimes": [
+    {
+      "name": "JavaSE-21",
+      "path": "/opt/java/openjdk",
+      "default": true
+    }
+  ],
+  "files.exclude": {
+    "**/target": true,
+    "**/node_modules": true
+  },
+  "java.compile.nullAnalysis.mode": "automatic"
+}
