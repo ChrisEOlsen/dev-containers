@@ -4,7 +4,7 @@ Copy this folder’s contents (including hidden files) into the root of a projec
 
 ## Included
 
-- Java 21 (Eclipse Temurin 21.0.11) and Node.js 24.15.0 with npm/npx.
+- Java 25 (Eclipse Temurin 25.0.4.1) and Node.js 24.15.0 with npm/npx.
 - PostgreSQL 16.13 on the private Compose network.
 - Codex CLI 0.162.0, Git, Python 3, curl, unzip, and Neovim (`nvim`).
 - Persistent volumes for PostgreSQL data, Maven cache and Codex state.

@@ -7,7 +7,7 @@
   "java.jdt.ls.java.home": "/opt/java/openjdk",
   "java.configuration.runtimes": [
     {
-      "name": "JavaSE-21",
+      "name": "JavaSE-25",
       "path": "/opt/java/openjdk",
       "default": true
     }
