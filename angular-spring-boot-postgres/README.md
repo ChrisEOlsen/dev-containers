@@ -51,6 +51,24 @@ All published ports bind to host loopback. PostgreSQL is accessible within Compo
 
 This is a toolchain template: Angular, Spring Boot, and Quartz dependencies belong to your application, and Maven should be invoked through the project’s Maven wrapper. AWS resources and tooling are not provisioned. `FILES_ENABLED=false` remains the local default; this template does not verify an S3 integration.
 
+## Accessing a remote machine over Tailscale
+
+The published ports bind to `127.0.0.1` on the machine running Docker. If Docker runs on a remote machine, your laptop’s `localhost` does not reach those ports directly. Run this command **on your laptop** to forward them through SSH over Tailscale:
+
+```sh
+ssh -N -o ExitOnForwardFailure=yes \
+  -L 127.0.0.1:5678:127.0.0.1:5678 \
+  -L 127.0.0.1:4200:127.0.0.1:4200 \
+  -L 127.0.0.1:8081:127.0.0.1:8081 \
+  your-user@remote-tailscale-name-or-ip
+```
+
+Replace `your-user` with your account on the remote machine and `remote-tailscale-name-or-ip` with its Tailscale hostname or IP. Both machines must have Tailscale connectivity, and the remote machine must accept SSH for your account (through its SSH server or configured Tailscale SSH).
+
+Keep the command running, then open <http://localhost:5678> for the editor, <http://localhost:4200> for the frontend, or <http://localhost:8081> for the backend **on your laptop**. Stop the tunnel with Ctrl+C. If a local port is occupied, change the first port in its `-L` mapping and use that port in your browser; for example, `-L 127.0.0.1:15678:127.0.0.1:5678` exposes the editor at <http://localhost:15678>.
+
+This is SSH **local forwarding** (`-L`): it brings services on the remote machine to your laptop. Reverse forwarding (`-R`) exposes a service from your laptop on the remote machine, so it is not needed for this setup. The Compose port bindings can stay as they are.
+
 ## Everyday use
 
 ```sh
