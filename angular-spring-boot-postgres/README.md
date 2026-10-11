@@ -6,12 +6,11 @@ Copy this folder’s contents (including hidden files) into the root of a projec
 
 - Java 21 (Eclipse Temurin 21.0.11) and Node.js 24.15.0 with npm/npx.
 - PostgreSQL 16.13 on the private Compose network.
-- code-server 4.141.0 with Java, Angular language support, and Vim extensions.
-- Codex CLI 0.162.0, Git, Python 3, curl, unzip, and Vim.
-- Persistent volumes for PostgreSQL data, Maven cache, editor state, and Codex state.
-- VS Code Dev Containers configuration and editor settings.
+- Codex CLI 0.162.0, Git, Python 3, curl, unzip, and Neovim (`nvim`).
+- Persistent volumes for PostgreSQL data, Maven cache and Codex state.
+- Zed and VS Code Dev Containers configuration; VS Code Java, Angular, and Vim extensions.
 
-The image and download versions are pinned to the source environment. This template targets Linux amd64 because its code-server download is architecture-specific. Docker Engine, Docker Compose with `include` support (Compose 2.20 or newer), and Python 3 for the setup script must be installed on the host. The container runs development tools as the non-root `dev` user; a short root initialization service fixes ownership of its cache volumes. The Docker socket is not mounted.
+The image and download versions are pinned to the source environment. The base images support Linux ARM64 and AMD64. Docker Engine, Docker Compose with `include` support (Compose 2.20 or newer), and Python 3 for the setup script must be installed on the host. The container runs development tools as the non-root `dev` user; a short root initialization service fixes ownership of its cache volumes. The Docker socket is not mounted.
 
 ## Quick start
 
@@ -22,20 +21,34 @@ The image and download versions are pinned to the source environment. This templ
    python3 scripts/init-local.py
    ```
 
-   The script generates random database and editor passwords, sets `LOCAL_UID` to your host user ID (or 1000 when run as root), and creates `.env` with owner-only permissions (`0600`). It leaves an existing `.env` untouched and never prints passwords. Open `.env` privately when you need the editor password. Run the script from your project root, and keep `.env` ignored by Git. The container group is GID 1000.
+   The script generates a random database password, sets `LOCAL_UID` to your host user ID (or 1000 when run as root), and creates `.env` with owner-only permissions (`0600`). It leaves an existing `.env` untouched and never prints passwords. Run the script from your project root, and keep `.env` ignored by Git. The container group is GID 1000.
 3. Build and start:
 
    ```sh
    docker compose -f compose.dev.yml up -d --build
    ```
 
-4. Open <http://localhost:5678> and sign in using `CODE_SERVER_PASSWORD`. The project is mounted at `/workspace/app`. For a terminal:
+4. Open the project root in your desktop editor:
 
-   ```sh
-   docker compose -f compose.dev.yml exec dev bash
-   ```
+   - **VS Code:** install the Dev Containers extension, then choose **Dev Containers: Reopen in Container** from the command palette.
+   - **Zed:** choose **Project: Open Remote → Connect Dev Container**, then select this project's configuration. Install current Zed and ensure Docker is available in its PATH.
 
-The first build downloads the toolchain and extensions; later starts reuse the image and volumes. Alternatively, open the project with VS Code’s Dev Containers extension and choose **Reopen in Container** after preparing `.env`.
+   Terminals and language servers run inside the container as `dev`. VS Code installs the configured Java, Angular, and Vim extensions; Zed installs its Java extension and uses its own language support. Editor extensions are managed by the desktop editor, not baked into the image.
+
+For a shell or Neovim without a desktop editor:
+
+```sh
+docker compose -f compose.dev.yml exec dev bash
+docker compose -f compose.dev.yml exec dev nvim
+```
+
+The container stays running with `sleep infinity`; there is no browser editor, editor password, or published editor port. The `dev` user's home, cache, configuration, and data directories are writable so editor remote servers can start. `LOCAL_UID` controls the image's user ID; the editor does not rewrite it. After changing it, rebuild the image.
+
+When migrating an existing setup, rebuild with `docker compose -f compose.dev.yml up -d --build`. Reconnect Zed to the new container; in VS Code use **Dev Containers: Rebuild and Reopen in Container**. PostgreSQL, Maven, and Codex volumes are preserved. The old unused editor volume is not mounted or deleted.
+
+Editor remote binaries and extensions may be downloaded again when the container is recreated. Neovim is installed from the base distribution's package repository and has no bundled plugin configuration.
+
+References: [Zed dev containers](https://zed.dev/docs/dev-containers), [VS Code dev containers](https://code.visualstudio.com/docs/devcontainers/containers).
 
 ## Running your application
 
@@ -43,7 +56,6 @@ Start your project’s frontend and backend from inside the container using its 
 
 | Service | Host address |
 | --- | --- |
-| Browser editor | http://localhost:5678 |
 | Angular frontend | http://localhost:4200 |
 | Spring Boot backend | http://localhost:8081 |
 
@@ -59,7 +71,6 @@ The published ports bind to `127.0.0.1` on the machine running Docker. If Docker
 
 ```sh
 ssh -N -o ExitOnForwardFailure=yes \
-  -L 127.0.0.1:5678:127.0.0.1:5678 \
   -L 127.0.0.1:4200:127.0.0.1:4200 \
   -L 127.0.0.1:8081:127.0.0.1:8081 \
   your-user@remote-tailscale-name-or-ip
@@ -69,7 +80,9 @@ Replace `your-user` with your account on the remote machine and `remote-tailscal
 
 If you changed `BACKEND_PORT` on the remote machine, update the destination port in the backend tunnel mapping too; for example, use `-L 127.0.0.1:8081:127.0.0.1:8082` for `BACKEND_PORT=8082`.
 
-Keep the command running, then open <http://localhost:5678> for the editor, <http://localhost:4200> for the frontend, or <http://localhost:8081> for the backend **on your laptop**. Stop the tunnel with Ctrl+C. If a local port is occupied, change the first port in its `-L` mapping and use that port in your browser; for example, `-L 127.0.0.1:15678:127.0.0.1:5678` exposes the editor at <http://localhost:15678>.
+Keep the command running, then open <http://localhost:4200> for the frontend or <http://localhost:8081> for the backend on your laptop. Stop the tunnel with Ctrl+C. If a local port is occupied, change the first port in its `-L` mapping and use that port in your browser.
+
+For editing on a remote Docker host, VS Code supports connecting to that host with Remote SSH and then reopening the project in its dev container. Zed's local dev container instructions above assume Docker runs locally; its SSH workflow is separate. Do not expose the Docker API or add an SSH server to this container just for local editor access.
 
 This is SSH **local forwarding** (`-L`): it brings services on the remote machine to your laptop. Reverse forwarding (`-R`) exposes a service from your laptop on the remote machine, so it is not needed for this setup. The Compose port bindings can stay as they are.
 
@@ -88,4 +101,4 @@ docker compose -f compose.dev.yml ps
 
 Each project directory gets its own Compose volumes by default. Use a unique `-p` project name if two directories have the same basename, and change host port mappings if running multiple environments simultaneously. Reusing the same Compose project name reuses its database and caches. Changing `POSTGRES_PASSWORD`, `POSTGRES_USER`, or `POSTGRES_DB` in `.env` does not reinitialize an existing PostgreSQL data volume.
 
-Keep `.env` and credentials out of version control. Persistent editor and Codex volumes may contain authentication state. This environment is intended for local development; production should use separate runtime images without development tools.
+Keep `.env` and credentials out of version control. The persistent Codex volume may contain authentication state. This environment is intended for local development; production should use separate runtime images without development tools.

@@ -1,9 +1,27 @@
 {
   "name": "Angular / Spring Boot / PostgreSQL",
-  "dockerComposeFile": ["../compose.dev.yml"],
+  "dockerComposeFile": [
+    "../compose.dev.yml"
+  ],
   "service": "dev",
   "workspaceFolder": "/workspace/app",
   "remoteUser": "dev",
   "overrideCommand": false,
-  "shutdownAction": "stopCompose"
+  "shutdownAction": "stopCompose",
+  "containerUser": "dev",
+  "updateRemoteUserUID": false,
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "Angular.ng-template",
+        "vscodevim.vim"
+      ]
+    },
+    "zed": {
+      "extensions": [
+        "java"
+      ]
+    }
+  }
 }

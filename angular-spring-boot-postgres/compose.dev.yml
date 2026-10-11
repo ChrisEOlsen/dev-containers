@@ -13,12 +13,11 @@ services:
       [
         "sh",
         "-c",
-        "chown -R ${LOCAL_UID:-1000}:1000 /home/dev/.m2 /home/dev/.local/share/code-server /home/dev/.codex",
+        "chown -R ${LOCAL_UID:-1000}:1000 /home/dev/.m2 /home/dev/.codex",
       ]
     volumes:
       [
         "maven:/home/dev/.m2",
-        "editor:/home/dev/.local/share/code-server",
         "codex:/home/dev/.codex",
       ]
   dev:
@@ -29,25 +28,23 @@ services:
         dockerfile: .devcontainer/Dockerfile,
         args: { DEV_UID: "${LOCAL_UID:-1000}" },
       }
+    user: dev
     depends_on:
       postgres: { condition: service_healthy }
       init-volumes: { condition: service_completed_successfully }
     environment:
-      PASSWORD: ${CODE_SERVER_PASSWORD:?Set CODE_SERVER_PASSWORD in .env}
       DATABASE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-app}
       POSTGRES_USER: ${POSTGRES_USER:-app}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
       APP_BASE_URL: http://localhost:4200
       FILES_ENABLED: "false"
-    ports: ["127.0.0.1:5678:5678", "127.0.0.1:${BACKEND_PORT:-8081}:8080", "127.0.0.1:4200:4200"]
+    ports: ["127.0.0.1:${BACKEND_PORT:-8081}:8080", "127.0.0.1:4200:4200"]
     volumes:
       [
         ".:/workspace/app",
         "maven:/home/dev/.m2",
-        "editor:/home/dev/.local/share/code-server",
         "codex:/home/dev/.codex",
       ]
 volumes:
   maven:
-  editor:
   codex:
