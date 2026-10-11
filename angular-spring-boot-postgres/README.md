@@ -47,6 +47,8 @@ Start your project’s frontend and backend from inside the container using its 
 | Angular frontend | http://localhost:4200 |
 | Spring Boot backend | http://localhost:8081 |
 
+If port 8081 is already in use, set `BACKEND_PORT=8082` (or another free port) in `.env`, then rerun `docker compose -f compose.dev.yml up -d`. Use the configured port in the backend URL, such as <http://localhost:8082>.
+
 All published ports bind to host loopback. PostgreSQL is accessible within Compose at `postgres:5432`; it has no published host port. The development service receives `DATABASE_URL` (a JDBC URL), `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `APP_BASE_URL`. Configure your Spring Boot project to consume these variables; they are not automatically mapped to Spring datasource properties.
 
 This is a toolchain template: Angular, Spring Boot, and Quartz dependencies belong to your application, and Maven should be invoked through the project’s Maven wrapper. AWS resources and tooling are not provisioned. `FILES_ENABLED=false` remains the local default; this template does not verify an S3 integration.
@@ -64,6 +66,8 @@ ssh -N -o ExitOnForwardFailure=yes \
 ```
 
 Replace `your-user` with your account on the remote machine and `remote-tailscale-name-or-ip` with its Tailscale hostname or IP. Both machines must have Tailscale connectivity, and the remote machine must accept SSH for your account (through its SSH server or configured Tailscale SSH).
+
+If you changed `BACKEND_PORT` on the remote machine, update the destination port in the backend tunnel mapping too; for example, use `-L 127.0.0.1:8081:127.0.0.1:8082` for `BACKEND_PORT=8082`.
 
 Keep the command running, then open <http://localhost:5678> for the editor, <http://localhost:4200> for the frontend, or <http://localhost:8081> for the backend **on your laptop**. Stop the tunnel with Ctrl+C. If a local port is occupied, change the first port in its `-L` mapping and use that port in your browser; for example, `-L 127.0.0.1:15678:127.0.0.1:5678` exposes the editor at <http://localhost:15678>.
 
