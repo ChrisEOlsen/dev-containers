@@ -1,6 +1,6 @@
 # Angular / Spring Boot / PostgreSQL development container
 
-Reusable development environment extracted from ReviewDesk. Copy this folder’s contents (including hidden files) into the root of a project, then start it with Docker Compose. Application code is not included.
+Copy this folder’s contents (including hidden files) into the root of a project, then start it with Docker Compose. Application code is not included.
 
 ## Included
 
